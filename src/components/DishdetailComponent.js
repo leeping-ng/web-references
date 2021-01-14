@@ -18,6 +18,7 @@ class DishDetail extends Component {
                             <CardText>{dish.description}</CardText>
                         </CardBody>
                     </Card>
+                    
                 </div>
             );
         }
@@ -36,9 +37,9 @@ class DishDetail extends Component {
                             &nbsp;
                             {new Intl.DateTimeFormat('en-US', {
                                 day: '2-digit',
-                                month: 'long',
+                                month: 'short',
                                 year: 'numeric'
-                            }).format(new Date(comment.date))}
+                            }).format(new Date(Date.parse(comment.date)))}
                         </p>
                     </li>
                 );
@@ -67,9 +68,11 @@ class DishDetail extends Component {
         }
 
         return (
-            <div className="row">
-                {this.renderDish(dish)}
-                {this.renderComments(dish.comments)}
+            <div className="container">
+                <div className="row">
+                    {this.renderDish(dish)}
+                    {this.renderComments(dish.comments)}
+                </div>
             </div>
         );
     }
