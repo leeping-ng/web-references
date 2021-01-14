@@ -26,9 +26,11 @@ class Main extends Component {
             			<NavbarBrand href="/">Ristorante Con Fusion</NavbarBrand>
           			</div>
         		</Navbar>
-        		<Menu dishes={this.state.dishes} 
+				<Menu dishes={this.state.dishes}
+					// Takes in dish.id from clicked card in MenuComponent.js and calls onDishSelect function 
             		onClick={(dishId) => this.onDishSelect(dishId)}/>
-        		<DishDetail 
+				<DishDetail 
+					// "Filter" creates an array filled with all array elements (dish) that pass a test
             		dish={this.state.dishes.filter((dish) => dish.id === this.state.selectedDish)[0]} />
       		</div>
     	);
