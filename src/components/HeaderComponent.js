@@ -1,3 +1,5 @@
+// Uses an uncontrolled form for the "Login" section
+
 import React, { Component } from 'react';
 import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron,
     Button, Modal, ModalHeader, ModalBody,

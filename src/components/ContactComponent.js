@@ -1,3 +1,5 @@
+// Uses a react-redux form for the "Feedback" section
+
 import React, { Component } from 'react';
 import { Breadcrumb, BreadcrumbItem, Button, Label, Col, Row } from 'reactstrap';
 import { Link } from 'react-router-dom';
