@@ -34,7 +34,6 @@ class Dishdetail extends Component {
 
     render() {
         const dishId = this.props.route.params.dishId;
-
         return(<RenderDish dish={this.state.dishes[+dishId]} />); // The '+' turns dishId from string to number
     }
     
