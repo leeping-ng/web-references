@@ -85,7 +85,8 @@ const AboutNavigator = () => {
 }
 function MainNavigator() {
     return (
-        <Drawer.Navigator initialRouteName="Home">
+        <Drawer.Navigator initialRouteName="Home" drawerStyle={{
+            backgroundColor: '#D1C4E9'}}>
             <Drawer.Screen name="Home" component={HomeNavigator} />
             <Drawer.Screen name="About Us" component={AboutNavigator} />
             <Drawer.Screen name="Menu" component={MenuNavigator} />
