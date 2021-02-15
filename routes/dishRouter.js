@@ -9,15 +9,17 @@ const dishRouter = express.Router();
 
 dishRouter.use(bodyParser.json());
 
-dishRouter.route('/') //no semicolons except last one
+// **************************************************************
+dishRouter.route('/')
 .get((req,res,next) => {
     Dishes.find({})
-    .then((dish) => {
+    .populate('comments.author')
+    .then((dishes) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-        res.json(dish);
+        res.json(dishes);
     }, (err) => next(err))
-    .catch((err) => next(err)); // pass to the overall error handling for application to handle
+    .catch((err) => next(err));
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     Dishes.create(req.body) // from body parser
@@ -44,10 +46,12 @@ dishRouter.route('/') //no semicolons except last one
     .catch((err) => next(err));
 });
 
+// **************************************************************
 
-dishRouter.route('/:dishId') //no semicolons except last one
+dishRouter.route('/:dishId')
 .get((req,res,next) => {
     Dishes.findById(req.params.dishId)
+    .populate('comments.author')
     .then((dish) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -81,10 +85,12 @@ dishRouter.route('/:dishId') //no semicolons except last one
     .catch((err) => next(err));
 });
 
+// **************************************************************
 
-dishRouter.route('/:dishId/comments') //no semicolons except last one
+dishRouter.route('/:dishId/comments')
 .get((req,res,next) => {
     Dishes.findById(req.params.dishId)
+    .populate('comments.author')
     .then((dish) => {
         if (dish != null) {
             res.statusCode = 200;
@@ -97,18 +103,23 @@ dishRouter.route('/:dishId/comments') //no semicolons except last one
             return next(err);
         }
     }, (err) => next(err))
-    .catch((err) => next(err)); // pass to the overall error handling for application to handle
+    .catch((err) => next(err));
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null) {
+            req.body.author = req.user._id;
             dish.comments.push(req.body);
             dish.save()
             .then((dish) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(dish);
+                Dishes.findById(dish._id)
+                .populate('comments.author')
+                .then((dish) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(dish);
+                })            
             }, (err) => next(err));
         }
         else {
@@ -147,10 +158,12 @@ dishRouter.route('/:dishId/comments') //no semicolons except last one
     .catch((err) => next(err));
 });
 
+// **************************************************************
 
-dishRouter.route('/:dishId/comments/:commentId') //no semicolons except last one
+dishRouter.route('/:dishId/comments/:commentId')
 .get((req,res,next) => {
     Dishes.findById(req.params.dishId)
+    .populate('comments.author')    
     .then((dish) => {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
             res.statusCode = 200;
@@ -165,7 +178,7 @@ dishRouter.route('/:dishId/comments/:commentId') //no semicolons except last one
         else {
             err = new Error('Comment ' + req.params.commentId + ' not found');
             err.status = 404;
-            return next(err);
+            return next(err);            
         }
     }, (err) => next(err))
     .catch((err) => next(err));
@@ -176,46 +189,24 @@ dishRouter.route('/:dishId/comments/:commentId') //no semicolons except last one
         + req.params.dishId + '/comments/' + req.params.commentId);
 })
 .put(authenticate.verifyUser, (req, res, next) => {
-        Dishes.findById(req.params.dishId)
-        .then((dish) => {
-            if (dish != null && dish.comments.id(req.params.commentId) != null) {
-                // mongoose doesn't support direct editing of embedded doc, so this is workaround
-                if (req.body.rating) {
-                    dish.comments.id(req.params.commentId).rating = req.body.rating;
-                }
-                if (req.body.comment) {
-                    dish.comments.id(req.params.commentId).comment = req.body.comment;
-                }
-                dish.save()
-                .then((dish) => {
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json(dish);
-                }, (err) => next(err));
-            }
-            else if (dish == null) {
-                err = new Error('Dish ' + req.params.dishId + ' not found');
-                err.status = 404;
-                return next(err);
-            }
-            else {
-                err = new Error('Comment ' + req.params.commentId + ' not found');
-                err.status = 404;
-                return next(err);
-            }
-        }, (err) => next(err))
-    .catch((err) => next(err));
-})
-.delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
-            dish.comments.id(req.params.commentId).remove();
+            if (req.body.rating) {
+                dish.comments.id(req.params.commentId).rating = req.body.rating;
+            }
+            if (req.body.comment) {
+                dish.comments.id(req.params.commentId).comment = req.body.comment;                
+            }
             dish.save()
             .then((dish) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(dish);
+                Dishes.findById(dish._id)
+                .populate('comments.author')
+                .then((dish) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(dish);  
+                })              
             }, (err) => next(err));
         }
         else if (dish == null) {
@@ -226,8 +217,38 @@ dishRouter.route('/:dishId/comments/:commentId') //no semicolons except last one
         else {
             err = new Error('Comment ' + req.params.commentId + ' not found');
             err.status = 404;
+            return next(err);            
+        }
+    }, (err) => next(err))
+    .catch((err) => next(err));
+})
+.delete(authenticate.verifyUser, (req, res, next) => {
+    Dishes.findById(req.params.dishId)
+    .then((dish) => {
+        if (dish != null && dish.comments.id(req.params.commentId) != null) {
+
+            dish.comments.id(req.params.commentId).remove();
+            dish.save()
+            .then((dish) => {
+                Dishes.findById(dish._id)
+                .populate('comments.author')
+                .then((dish) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(dish);  
+                })               
+            }, (err) => next(err));
+        }
+        else if (dish == null) {
+            err = new Error('Dish ' + req.params.dishId + ' not found');
+            err.status = 404;
             return next(err);
-        } 
+        }
+        else {
+            err = new Error('Comment ' + req.params.commentId + ' not found');
+            err.status = 404;
+            return next(err);            
+        }
     }, (err) => next(err))
     .catch((err) => next(err));
 });
