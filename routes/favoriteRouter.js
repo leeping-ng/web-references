@@ -23,14 +23,14 @@ favoriteRouter.route('/')
     });
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({ user: req.user._id}, (err, favorite) => { //see until favroite
+    Favorites.findOne({ user: req.user._id}, (err, favorite) => { 
         if (err) return next(err);
 
         if (!favorite) {
             Favorites.create({ user: req.user._id })
             .then((favorite) => {
                 for (i=0; i<req.body.length; i++)
-                    if (favorite.dishes.indexOf(req.body[i]._id)) //assume _id
+                    if (favorite.dishes.indexOf(req.body[i]._id)) 
                         favorite.dishes.push(req.body[i]);
                 favorite.save()
                 .then((favorite) => {
@@ -79,7 +79,7 @@ favoriteRouter.route('/')
     res.end('PUT operation is not supported on /favorites');
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOneAndRemove({ user: req.user._id }, (err, resp) => { // see until err
+    Favorites.findOneAndRemove({ user: req.user._id }, (err, resp) => { 
         if (err) return next(err);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -114,7 +114,7 @@ favoriteRouter.route('/:dishId')
     .catch((err) => next(err))
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({ user: req.user._id}, (err, favorite) => { //see until favroite
+    Favorites.findOne({ user: req.user._id}, (err, favorite) => { 
         if (err) return next(err);
 
         if (!favorite) {
@@ -172,7 +172,7 @@ favoriteRouter.route('/:dishId')
     res.end('PUT operation is not supported on /favorites/' + req.params.dishId);
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorites.findOne({ user: req.user._id}, (err, favorite) => { //see until favroite
+    Favorites.findOne({ user: req.user._id}, (err, favorite) => { 
         if (err) return next(err);
 
         console.log(favorite);
