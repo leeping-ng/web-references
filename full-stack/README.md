@@ -28,9 +28,44 @@ The Javascript libraries/frameworks used in this repo are as follows:
 
 ## How to Start
 
-To run this demo, you'll need to open up 3 separate terminal windows to run the following:
-- MongoDB server: 
-- Express server:
-- React client:
+At a high level, you'll be required to start 3 separate terminal windows to run the MongoDB server, Express Node.js server, and React client.
+
+1. Clone this repo:
+    ```
+    git clone https://github.com/leeping-ng/web-references.git
+    cd web-references/full-stack
+    ```
+2. Download and install [MongoDB](https://www.mongodb.com/3). Then, run these commands:
+    ```
+    mkdir mongoDB-server
+    cd mongoDB-server
+    mkdir data
+    ```
+3. Start the mongoDB server at the `mongoDB-server` directory:
+    ```
+    mongod --dbpath=data --bind_ip 127.0.0.1
+    ```
+4. At the moment, the mongoDB database has nothing inside. (Incorrect, everything is there. Need to delete and find how to start from scratch by adding from db.json either through Mongo REPL or postman)
+
+5. Open a new terminal window, and start the Express server:
+    ```
+    cd express-server
+    npm install # install all dependencies in package.json
+    npm start
+    ```
+6. Open a new terminal window, and start the React client:
+    ```
+    cd react-client
+    yarn install --ignore-engines # install node modules
+    yarn start
+    ```
+    Respond 'Y' to this prompt.
+    ```
+    Something is already running on port 3000.
+    Would you like to run the app on another port instead? (Y/n)
+    ```
+    The website should automatically open on your browser.
+
+
 
 
