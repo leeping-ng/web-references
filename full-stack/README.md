@@ -23,7 +23,7 @@ As Javascript is being used beyond it's original intentions, it lacked the trait
 The Javascript libraries/frameworks used in this repo are as follows:
 - Presentation tier: React, which is the front end library built by Facebook
 - Business logic / application tier: Express with Node.js. Express is a very popular framework/ node module for building HTTP servers that use [REST api](https://en.wikipedia.org/wiki/Representational_state_transfer)
-- Data tier: MongoDB, a NoSQL database that's easier to scale compared to traditional relational SQL databases. Data is stored in JSON documents.
+- Data tier: MongoDB, a NoSQL database that's [easier to scale](https://www.mongodb.com/nosql-explained/nosql-vs-sql) compared to traditional relational SQL databases. Data is stored in [BSON documents](https://www.mongodb.com/json-and-bson), which is similar to JSON but with improvements.
 
 
 ## How to Start
@@ -48,7 +48,16 @@ The servers and client will all be run locally from your computer, and you'll be
 4. At the moment, the mongoDB database has nothing inside. We'll need to add collections to the database in the following steps,
 using [Postman](https://www.postman.com/), which makes it easier than using the CLI of Mongo REPL. Nevertheless, this will be quite a lengthy process.
 
-5. Create an administrator account:
+5. To use Postman, we'll have to get the Express server up and running first. First, we'll need to [install Node](https://nodejs.org/en/).
+
+6. Open a new terminal window, and start the Express server:
+    ```
+    cd express-server
+    npm install # install all dependencies in package.json
+    npm start
+    ```
+
+7. Create an administrator account:
     - The Express server was designed with 2 categories of accounts: "admin" with special privileges such as adding and deleting collections to the database, and the typical user without these rights.
     - Using Postman, we'll create an admin account. 
     Do a POST request to `http://localhost:3000/users/signup` with the following in the body as JSON:
@@ -62,7 +71,7 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
     - Open a new terminal and:
         ```
         mongo
-        use conFusion // WHERE WAS THIS SET??
+        use conFusion # db name set in config.js
         db.users.find().pretty()
         ```
         We can see that the "admin" flag is set to false for this account.
@@ -74,7 +83,7 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
         ```
         Now you'll find that the admin flag is set to true.
 
-6. Login as an administrator:
+8. Login as an administrator:
     - In Postman, do a POST request to `http://localhost:3000/users/login`, keeping the previous details in the body.
         ```
         {"username": "admin", "password":"password"}
@@ -86,7 +95,7 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
     - Do a GET request on `http://localhost:3000/users` and it should show that "admin" is the only registered user.
     This endpoint is only available for those with "admin": true so it's a good check to see if the above steps were done correctly.
 
-7. Start adding collections to the MongoDB database:
+9. Start adding collections to the MongoDB database:
     - [db.json](db.json) contains the JSON data required for the database. We will be copying from this file and pasting into Postman, one at a time.
     - Dishes: There are a total of 4 different dishes. Do a  POST request to `http://localhost:3000/dishes` for each dish separately, copying from db.json and pasting the details of each dish in the JSON body field of Postman as shown below.
 
@@ -100,7 +109,7 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
         db.promotions.find().pretty()
         ```
 
-8. Create a user account, login, and add a favorite dish:
+10. Create a user account, login, and add a favorite dish:
     - There are 2 reasons for this - firstly, a user is able to perform some tasks like adding to favorites or adding comments to dishes that an admin is not able to. Secondly, there's a bug in the code that crashes the client when clicking on any dish under menu. This can be resolved by creating a user account and adding a favorite to it.
     - Follow the previous instructions to create the account, login, and authenticate, using the account details below in the JSON body field.
     ```
@@ -115,14 +124,9 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
     - Do a POST on `http://localhost:3000/favorites/6030f7fc2a8283413c64f54e` by pasting the dish ID here. Now it's been added to favorites.
     - Finally, we have completed setting up the MongoDB database.
 
-9. Open a new terminal window, and start the Express server:
-    ```
-    cd express-server
-    npm install # install all dependencies in package.json
-    npm start
-    ```
 
-10. Open a new terminal window, and start the React client:
+
+11. Open a new terminal window, and start the React client:
     ```
     cd react-client
     yarn install --ignore-engines # install node modules
@@ -134,15 +138,30 @@ using [Postman](https://www.postman.com/), which makes it easier than using the 
     Would you like to run the app on another port instead? (Y/n)
     ```
 
-11. The website should automatically open on your browser. The view below shows the home page. 
+12. The website should automatically open on your browser. The view below shows the home page. 
     <img src="images/home.png">
 
-12. Play around with the functionality as a user:
+13. Play around with the functionality as a user:
     - Login as a user by clicking the *login* button at the top right, and signing in with the details used when setting up the user account in the earlier step. If successful, the username should appear beside the *login* button
     - Add a dish as a favorite by clicking the heart. It can be removed from favorites by clicking the 'x' as shown below.
         <img src="images/favorites.png">
     - Click on a dish and add a comment as follows:
         <img src="images/comment.png">
+
+## Additional Details
+
+Here are some Node modules used by the Express server that are worth a mention:
+- Express Router (within Express Node Module): Allows the application to be subdivided and organized into multiple mini Express-like applications, which combine together to form the Express application. This really helps tidy up the code when we are dealing with various REST API and parts.
+- Express Generator: Installed as a global Node Module, it is a quick scaffolding tool that will help us to quickly build up the structure for an Express application with some starting code already built and some standard middleware already included into the application.
+- Mongoose ODM: MongoDB is a NoSQL database, and doesn't explicitly need structure for it's documents unlike relational databases. In our application we would like some structure, so Mongoose ODM allows us to build a schema to apply structure to our documents.
+- Mongoose Population: NoSQL databases are not relational, but sometimes, we want to pull information from a document into another, to avoid duplicating information in both documents. Mongoose Population helps deal with this. However, it does create overheads on the server as it takes time to perform the search, and thus should be used sparingly.
+- Passport and JSON Web Token: For token-based authentication. We saw how this worked in the previous section where the token was generated upon login, and had to be pasted into the bearer token field.
+    - Cookie and session-based authentication require the server to keep track of different users, which violates the REST principle of stateless servers, and therefore is not scalable. Also, mobile apps have a tough time with these.
+    - In token-based authentication, the server issues a token to a validated user. All subsequent requests from the client will have the token in the request header/body, and nothing is stored on the server. Also, this method helps with CORS or CSRF problems.
+- https: http plus the use of encryption and decryption, supported through SSL and TLS. The private key and public certificate are stored in [bin](bin), and traffic is redirected from the insecure HTTP server to the secure HTTPS server.
+- Multer: to allow file uploads.
+- CORS (Cross Origin Resource Sharing): Most browsers implement a security mechanism called the [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy) that restricts how a document or a script loaded from one origin will interact with resources from another origin. The origin is different if the protocol (http/https), port, and host are different. In our case, because we implemented the https server, the protocol is different and therefore we need to use CORS.
+
 
 
 
